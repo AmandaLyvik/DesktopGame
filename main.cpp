@@ -12,6 +12,9 @@ ULONG_PTR gdiplusToken; // this is like a "session ID" you pass to GdiplusStartu
 // Declares the window procedure function that will handle messages
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
 // Entry point
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     // Init GDI+
@@ -32,7 +35,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         wc.lpszClassName,
         L"Overlay",
         WS_POPUP, // No border, no title bar
-        0, 0, 800, 600,
+        0, 0, screenWidth, screenHeight,
         nullptr, nullptr, hInstance, nullptr
     );
 
@@ -43,8 +46,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
     BITMAPINFO bmi = { 0 };
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    bmi.bmiHeader.biWidth = 800;
-    bmi.bmiHeader.biHeight = -600; // top-down. aligns with normal screen coordinates (top left is (0,0))
+    bmi.bmiHeader.biWidth = screenWidth;
+    bmi.bmiHeader.biHeight = -screenHeight; // top-down. aligns with normal screen coordinates (top left is (0,0))
     bmi.bmiHeader.biPlanes = 1;
     bmi.bmiHeader.biBitCount = 32;
     bmi.bmiHeader.biCompression = BI_RGB;
@@ -57,13 +60,25 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     Graphics graphics(hdcMem);
     graphics.Clear(Color(0, 0, 0, 0)); // Fully transparent
 
-    // Draw a red circle
-    SolidBrush brush(Color(200, 255, 0, 0)); // Alpha=200, Red
-    graphics.FillEllipse(&brush, 300, 200, 200, 200); // x, y, width, height
+    // get the sprite
+    Image sprite(L"img/cat.png");
+    int spriteWidth = sprite.GetWidth();
+    int spriteHeight = sprite.GetHeight();
+    
+    // scale while maintianing aspect ratio
+    int targetHeight = 150;
+    float aspectRatio = static_cast<float>(spriteWidth) / spriteHeight;
+    int targetWidth = static_cast<int>(targetHeight * aspectRatio);
+
+    // position 
+    int x = (screenWidth - targetWidth) / 2;
+    int y = screenHeight - targetHeight - 50;
+
+    graphics.DrawImage(&sprite, x, y, targetWidth, targetHeight);
 
     // Apply drawing
     POINT ptSrc = { 0, 0 };
-    SIZE sizeWnd = { 800, 600 };
+    SIZE sizeWnd = { screenWidth, screenHeight };
     BLENDFUNCTION blend = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
     UpdateLayeredWindow(hwnd, hdcScreen, nullptr, &sizeWnd, hdcMem, &ptSrc, 0, &blend, ULW_ALPHA);
 
