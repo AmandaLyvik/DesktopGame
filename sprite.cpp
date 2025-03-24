@@ -44,6 +44,10 @@ void Sprite::LoadStateMachine(const std::wstring& stateMachinePath) {
           if (transition.contains("probability")) {
             newTransition.probability = transition["probability"];
           }
+          if (transition.contains("intervalMin") && transition.contains("intervalMax")) {
+            newTransition.intervalMin = transition["intervalMin"];
+            newTransition.intervalMax = transition["intervalMax"];
+          }
           newState.transitions.push_back(newTransition);
       }
 
@@ -124,7 +128,7 @@ void Sprite::ApplyAnimation(const std::string& animationName) {
   currentFrames = loadedAnimations[animationName];
   currentFrame = 0;
   lastUpdateTime = GetTickCount();
-  elapsedSinceLastFrame = 0;
+  animationStartTimes[currentAnimation] = lastUpdateTime;  // Track animation start time
 
   auto movementIt = animationMovements.find(animationName);
   if (movementIt != animationMovements.end()) {
@@ -143,34 +147,56 @@ void Sprite::CheckTransition() {
       conditionGroups[transition.condition].push_back(transition);
   }
 
-  // Evaluate each condition **only once**
   for (const auto& [condition, transitions] : conditionGroups) {
-      if (EvaluateCondition(condition)) { 
-          // Calculate total probability
-          float totalWeight = 0.0f;
-          for (const auto& t : transitions) {
-              totalWeight += t.probability;
-          }
+    for (const auto& transition : transitions) {
+        if (EvaluateCondition(condition, transition)) {  // Pass the full transition object
+            float totalWeight = 0.0f;
+            for (const auto& t : transitions) {
+                totalWeight += t.probability;
+            }
 
-          // Generate a random number in range [0, totalWeight]
-          float r = static_cast<float>(rand()) / RAND_MAX * totalWeight;
+            float r = static_cast<float>(rand()) / RAND_MAX * totalWeight;
 
-          // Pick a transition based on probability
-          float cumulative = 0.0f;
-          for (const auto& t : transitions) {
-              cumulative += t.probability;
-              if (r <= cumulative) {
-                  ApplyTransition(t.to);
-                  return; // Only one transition should happen
-              }
-          }
-      }
+            float cumulative = 0.0f;
+            for (const auto& t : transitions) {
+                cumulative += t.probability;
+                if (r <= cumulative) {
+                    ApplyTransition(t.to);
+                    return;
+                }
+            }
+        }
+    }
   }
 }
 
-bool Sprite::EvaluateCondition(const std::string& condition) {
+bool Sprite::EvaluateCondition(const std::string& condition, const Transition& transition) {
+  DWORD now = GetTickCount();
+  
   if (condition == "atEndOfScreen" && x + width >= screenWidth) return true;
   if (condition == "atStartOfScreen" && x <= 0) return true;
+  if (condition == "randomInterval") {
+    DWORD startTime = animationStartTimes[currentAnimation];
+    DWORD elapsed = now - startTime;
+    
+    if (transition.intervalMin > 0 && transition.intervalMax > 0) {
+      static std::unordered_map<std::string, DWORD> randomDelays;
+      
+      // Generate a random delay once per animation
+      if (randomDelays.find(currentAnimation) == randomDelays.end()) {
+          int randomInterval = transition.intervalMin + (rand() % (transition.intervalMax - transition.intervalMin));
+          randomDelays[currentAnimation] = randomInterval;
+      }
+
+      return elapsed >= randomDelays[currentAnimation];
+    }
+  }
+  if (condition == "setInterval") {
+    DWORD startTime = animationStartTimes[currentAnimation];
+    DWORD elapsed = now - startTime;
+
+    return elapsed >= transition.intervalSet;
+  }
   // Add more conditions here if needed
 
   return false; // Default to false if the condition is unknown

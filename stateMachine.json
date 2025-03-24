@@ -5,12 +5,12 @@
       {
         "to": "walkLeft",
         "condition": "atEndOfScreen",
-        "probability": 0.1
+        "probability": 0.0
       },
       {
         "to": "spinRight",
         "condition": "atEndOfScreen",
-        "probability": 0.9
+        "probability": 1.0 
       }
     ]
   },
@@ -27,10 +27,10 @@
     "animation": "spinRight",
     "transitions": [
       {
-        "to": "walkRight",
+        "to": "walkLeft",
         "condition": "randomInterval",
-        "intervalMin": 5000,
-        "intervalMax": 10000
+        "intervalMin": 500,
+        "intervalMax": 1000
       }
     ]
   }

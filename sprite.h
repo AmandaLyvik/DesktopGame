@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <unordered_map>
 
 class Sprite
 {
@@ -37,6 +38,9 @@ private:
         std::string to;
         std::string condition;
         float probability = 1.0f;
+        int intervalMin = 0;  // Minimum wait time for "randomInterval"
+        int intervalMax = 0;  // Maximum wait time for "randomInterval"
+        int intervalSet = 0;  // Exact wait time for "setInterval"
     };
     struct State {
         std::string animation;
@@ -46,6 +50,7 @@ private:
     std::map<std::string, std::vector<Frame>> loadedAnimations; // Store animations
     std::map<std::string, std::pair<int, int>> animationMovements; // dx, dy
     std::map<std::string, State> stateMachine;  // State machine with transitions
+    std::unordered_map<std::string, DWORD> animationStartTimes;
 
     int currentFrame = 0;
     std::string currentAnimation;
@@ -65,6 +70,6 @@ private:
     void ApplyAnimation(const std::string& animationName);
     void CheckTransition();
     void ApplyTransition(const std::string& targetAnimation);
-    bool EvaluateCondition(const std::string& condition);
+    bool EvaluateCondition(const std::string& condition, const Transition& transition);
     Gdiplus::Image *GetCurrentFrameImage() const;
 };
