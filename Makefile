@@ -10,7 +10,7 @@ LIBS = user32.lib gdi32.lib gdiplus.lib          # Libraries we’re linking aga
 LFLAGS = /link $(LIBS)                           # Linker flags (tacked on after source)
 
 # Source and output
-SRC = main.cpp                     # Your source file
+SRC = main.cpp sprite.cpp          # Your source files
 OUT = main.exe                     # Final executable name
 
 # Default target (what runs when you type just `nmake`)
