@@ -1,6 +1,6 @@
 # Compiler and flags
 CC = cl                           # The Microsoft C/C++ compiler
-CFLAGS = /nologo /EHsc /Zi /DUNICODE /D_UNICODE  # Compiler flags:
+CFLAGS = /nologo /EHsc /Zi /DUNICODE /D_UNICODE /I nlohmann  # Compiler flags:
                                                  # - /nologo = no splash banner
                                                  # - /EHsc = enable C++ exceptions
                                                  # - /Zi = include debug info

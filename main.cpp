@@ -16,8 +16,7 @@ ULONG_PTR gdiplusToken; // this is like a "session ID" you pass to GdiplusStartu
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 
-const int ANIMATION_TIMER_ID = 1;
-const int MOVEMENT_TIMER_ID = 2;
+const int ANIMATION_TIMER_ID = 0;
 
 const int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 const int screenWidth = GetSystemMetrics(SM_CXSCREEN);
@@ -63,8 +62,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     GdiplusStartup(&gdiplusToken, &gdiPlusStartupInput, nullptr);
 
     // Load animation frames
-    sprite.AddFrame(L"img/walk1.png");
-    sprite.AddFrame(L"img/walk2.png");
+    sprite.LoadFromJson(L"animations/walk.json");
 
     // Set size
     sprite.SetHeight(150);
@@ -90,9 +88,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         nullptr, nullptr, hInstance, nullptr
     );
 
-    // Set timers
-    SetTimer(hwnd, ANIMATION_TIMER_ID, 150, nullptr);  // Switch frame every 150ms
-    SetTimer(hwnd, MOVEMENT_TIMER_ID, 30, nullptr);    // Move every 30ms
+    // Set timer
+    SetTimer(hwnd, ANIMATION_TIMER_ID, 16, nullptr);  // ~60 FPS
 
     ShowWindow(hwnd, SW_SHOW);
 
@@ -115,13 +112,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     switch (uMsg) {
         case WM_TIMER:
             if (wParam == ANIMATION_TIMER_ID) {
-                sprite.Update();
-            } else if (wParam == MOVEMENT_TIMER_ID) {
-                sprite.Move(2); // Loop back
+                sprite.Update(); // Handles animation + movement
+                InvalidateRect(hwnd, nullptr, FALSE); // Redraw
             }
-
-            // Trigger redraw
-            InvalidateRect(hwnd, nullptr, FALSE);
             return 0;
 
         case WM_PAINT: {
@@ -137,7 +130,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
         case WM_DESTROY:
             KillTimer(hwnd, ANIMATION_TIMER_ID);
-            KillTimer(hwnd, MOVEMENT_TIMER_ID);
             PostQuitMessage(0);
             return 0;
     }
