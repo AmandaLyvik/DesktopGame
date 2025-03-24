@@ -1,9 +1,0 @@
-{
-    "name": "walk",
-    "frames": [
-      { "image": "img/walk1.png", "duration": 150 },
-      { "image": "img/walk2.png", "duration": 150 }
-    ],
-    "movement": { "dx": 2, "dy": 0 },
-    "loop": true
-  }

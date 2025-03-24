@@ -1,0 +1,20 @@
+{
+  "walkRight": {
+    "animation": "walkRight",
+    "transitions": [
+      {
+        "to": "walkLeft",
+        "condition": "atEndOfScreen"
+      }
+    ]
+  },
+  "walkLeft": {
+    "animation": "walkLeft",
+    "transitions": [
+      {
+        "to": "walkRight",
+        "condition": "atStartOfScreen"
+      }
+    ]
+  }
+}

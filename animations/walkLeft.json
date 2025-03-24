@@ -1,0 +1,9 @@
+{
+  "name": "walkLeft",
+  "frames": [
+    { "image": "img/walkLeft1.png", "duration": 150 },
+    { "image": "img/walkLeft2.png", "duration": 150 }
+  ],
+  "movement": { "dx": -2, "dy": 0 },
+  "loop": true
+}

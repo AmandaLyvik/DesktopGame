@@ -41,7 +41,11 @@ void RedrawSprite(HWND hwnd) {
     Graphics graphics(hdcMem);
     graphics.Clear(Color(0, 0, 0, 0)); // Transparent background
 
-    sprite.Draw(graphics);
+    try {
+        sprite.Draw(graphics);
+    } catch (...) {
+        MessageBox(nullptr, L"Crash during Draw()!", L"Error", MB_OK);
+    }
     
     // Apply to layered window
     SIZE wndSize = { screenWidth, screenHeight };
@@ -62,13 +66,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     GdiplusStartup(&gdiplusToken, &gdiPlusStartupInput, nullptr);
 
     // Load animation frames
-    sprite.LoadFromJson(L"animations/walk.json");
+    sprite.LoadAnimations("animations");
+    sprite.LoadStateMachine(L"stateMachine.json");
 
     // Set size
     sprite.SetHeight(150);
 
     // Starting position
-    sprite.SetPosition(0, sprite.GetScreenHeight() - sprite.GetHeight() - 50);
+    sprite.SetPosition(sprite.GetScreenWidth() - 3*sprite.GetWidth(), sprite.GetScreenHeight() - sprite.GetHeight() - 50);
 
     // THE WINDOW
     // Register window class

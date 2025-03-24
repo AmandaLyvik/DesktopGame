@@ -3,18 +3,21 @@
 #include <gdiplus.h>
 #include <vector>
 #include <string>
+#include <map>
 
-
-class Sprite {
+class Sprite
+{
 public:
     Sprite(int screenW, int screenH);
     ~Sprite();
 
-    void LoadFromJson(const std::wstring& jsonPath);
+    //void LoadFromJson(const std::wstring &jsonPath);
+    void LoadStateMachine(const std::wstring &stateMachinePath);
+    void LoadAnimations(const std::string& folder);
 
-    void Update();  // Called every tick (e.g. 16ms)
-    void Move(int dx);
-    void Draw(Gdiplus::Graphics& g);
+    void Update(); // Called every tick (e.g. 16ms)
+    void Move(int dx, int dy);
+    void Draw(Gdiplus::Graphics &g);
 
     void SetPosition(int x, int y);
     void SetHeight(int h);
@@ -25,12 +28,27 @@ public:
     int GetScreenWidth() const { return screenWidth; }
 
 private:
-    struct Frame {
-        Gdiplus::Image* image;
+    struct Frame
+    {
+        Gdiplus::Image *image;
         int durationMs;
     };
-    std::vector<Frame> frames;
+    struct Transition {
+        std::string to;
+        std::string condition;
+    };
+    struct State {
+        std::string animation;
+        std::vector<Transition> transitions;
+    };
+
+    std::map<std::string, std::vector<Frame>> loadedAnimations; // Store animations
+    std::map<std::string, std::pair<int, int>> animationMovements; // dx, dy
+    std::map<std::string, State> stateMachine;  // State machine with transitions
+
     int currentFrame = 0;
+    std::string currentAnimation;
+    std::vector<Frame> currentFrames;
 
     int screenWidth;
     int screenHeight;
@@ -42,5 +60,9 @@ private:
     DWORD lastUpdateTime = 0;
     int elapsedSinceLastFrame = 0;
 
-    Gdiplus::Image* GetCurrentFrameImage() const;
+    void LoadAnimation(const std::string& animationName, const std::wstring& animationPath);
+    void ApplyAnimation(const std::string& animationName);
+    void CheckTransition();
+    void ApplyTransition(const std::string& targetAnimation);
+    Gdiplus::Image *GetCurrentFrameImage() const;
 };
