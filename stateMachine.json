@@ -4,7 +4,13 @@
     "transitions": [
       {
         "to": "walkLeft",
-        "condition": "atEndOfScreen"
+        "condition": "atEndOfScreen",
+        "probability": 0.1
+      },
+      {
+        "to": "spinRight",
+        "condition": "atEndOfScreen",
+        "probability": 0.9
       }
     ]
   },
@@ -14,6 +20,17 @@
       {
         "to": "walkRight",
         "condition": "atStartOfScreen"
+      }
+    ]
+  },
+  "spinRight": {
+    "animation": "spinRight",
+    "transitions": [
+      {
+        "to": "walkRight",
+        "condition": "randomInterval",
+        "intervalMin": 5000,
+        "intervalMax": 10000
       }
     ]
   }

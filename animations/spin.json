@@ -1,0 +1,12 @@
+{
+    "name": "spinRight",
+    "frames": [
+      { "image": "img/back.png", "duration": 150 },
+      { "image": "img/left.png", "duration": 150 },
+      { "image": "img/front.png", "duration": 150 },
+      { "image": "img/right.png", "duration": 150 }
+    ],
+    "movement": { "dx": 0, "dy": 0 },
+    "loop": true
+  }
+  

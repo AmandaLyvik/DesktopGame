@@ -36,6 +36,7 @@ private:
     struct Transition {
         std::string to;
         std::string condition;
+        float probability = 1.0f;
     };
     struct State {
         std::string animation;
@@ -64,5 +65,6 @@ private:
     void ApplyAnimation(const std::string& animationName);
     void CheckTransition();
     void ApplyTransition(const std::string& targetAnimation);
+    bool EvaluateCondition(const std::string& condition);
     Gdiplus::Image *GetCurrentFrameImage() const;
 };

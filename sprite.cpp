@@ -41,6 +41,9 @@ void Sprite::LoadStateMachine(const std::wstring& stateMachinePath) {
           Transition newTransition;
           newTransition.to = transition["to"];
           newTransition.condition = transition["condition"];
+          if (transition.contains("probability")) {
+            newTransition.probability = transition["probability"];
+          }
           newState.transitions.push_back(newTransition);
       }
 
@@ -133,15 +136,44 @@ void Sprite::ApplyAnimation(const std::string& animationName) {
 void Sprite::CheckTransition() {
   const auto& currentState = stateMachine[currentAnimation];
 
-  // Check if any transitions are met
+  // Group transitions by condition
+  std::unordered_map<std::string, std::vector<Transition>> conditionGroups;
+
   for (const auto& transition : currentState.transitions) {
-      if (transition.condition == "atEndOfScreen" && x + width >= screenWidth) {
-          ApplyTransition(transition.to);
-      }
-      else if (transition.condition == "atStartOfScreen" && x <= 0) {
-          ApplyTransition(transition.to);
+      conditionGroups[transition.condition].push_back(transition);
+  }
+
+  // Evaluate each condition **only once**
+  for (const auto& [condition, transitions] : conditionGroups) {
+      if (EvaluateCondition(condition)) { 
+          // Calculate total probability
+          float totalWeight = 0.0f;
+          for (const auto& t : transitions) {
+              totalWeight += t.probability;
+          }
+
+          // Generate a random number in range [0, totalWeight]
+          float r = static_cast<float>(rand()) / RAND_MAX * totalWeight;
+
+          // Pick a transition based on probability
+          float cumulative = 0.0f;
+          for (const auto& t : transitions) {
+              cumulative += t.probability;
+              if (r <= cumulative) {
+                  ApplyTransition(t.to);
+                  return; // Only one transition should happen
+              }
+          }
       }
   }
+}
+
+bool Sprite::EvaluateCondition(const std::string& condition) {
+  if (condition == "atEndOfScreen" && x + width >= screenWidth) return true;
+  if (condition == "atStartOfScreen" && x <= 0) return true;
+  // Add more conditions here if needed
+
+  return false; // Default to false if the condition is unknown
 }
 
 void Sprite::ApplyTransition(const std::string& targetAnimation) {
