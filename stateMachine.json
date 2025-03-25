@@ -20,6 +20,10 @@
       {
         "to": "walkRight",
         "condition": "atStartOfScreen"
+      }, 
+      {
+        "to": "spinRight",
+        "condition": "onClick"
       }
     ]
   },

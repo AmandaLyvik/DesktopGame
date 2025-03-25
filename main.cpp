@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include "sprite.h"
+#include <iostream>
 
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "gdi32.lib")
@@ -50,8 +51,9 @@ void RedrawSprite(HWND hwnd) {
     // Apply to layered window
     SIZE wndSize = { screenWidth, screenHeight };
     POINT srcPt = { 0, 0 };
+    POINT ptDst = { 0, 0 };
     BLENDFUNCTION blend = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
-    UpdateLayeredWindow(hwnd, hdcScreen, nullptr, &wndSize, hdcMem, &srcPt, 0, &blend, ULW_ALPHA);
+    UpdateLayeredWindow(hwnd, hdcScreen, &ptDst, &wndSize, hdcMem, &srcPt, 0, &blend, ULW_ALPHA);
 
     // Cleanup
     DeleteObject(hBitmap);
@@ -85,13 +87,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
     // Create layered, transparent, topmost window
     HWND hwnd = CreateWindowExW(
-        WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOPMOST, //  per-pixel transparency | Click-through | stay above all other windows
+        WS_EX_LAYERED |  WS_EX_TOPMOST,
         wc.lpszClassName,
-        L"Overlay",
+        L"MyDesktopGame",
         WS_POPUP, // No border, no title bar
         0, 0, screenWidth, screenHeight,
         nullptr, nullptr, hInstance, nullptr
     );
+    
 
     // Set timer
     SetTimer(hwnd, ANIMATION_TIMER_ID, 16, nullptr);  // ~60 FPS
@@ -114,14 +117,32 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
 // Handles the WM_DESTROY message (sent when window closes), so app quits cleanly.
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    int mouseX = LOWORD(lParam);
+    int mouseY = HIWORD(lParam);
+
     switch (uMsg) {
-        case WM_TIMER:
+        case WM_LBUTTONDOWN: {  // Left mouse button click
+            sprite.OnMouseClick(mouseX, mouseY); // Call sprite's click handler
+            return 0;
+        }
+
+        case WM_MOUSEMOVE: {
+            // Change cursor when hovering over sprite
+            if (sprite.IsMouseOver(mouseX, mouseY)) {
+                SetCursor(LoadCursor(nullptr, IDC_HAND));  // Change cursor to hand
+            } else {
+                SetCursor(LoadCursor(nullptr, IDC_ARROW));  // Default cursor
+            }
+            return 0;
+        }
+
+        case WM_TIMER: {
             if (wParam == ANIMATION_TIMER_ID) {
                 sprite.Update(); // Handles animation + movement
                 InvalidateRect(hwnd, nullptr, FALSE); // Redraw
             }
             return 0;
-
+        }
         case WM_PAINT: {
             PAINTSTRUCT ps;
             BeginPaint(hwnd, &ps);
@@ -132,11 +153,11 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             EndPaint(hwnd, &ps);
             return 0;
         }
-
-        case WM_DESTROY:
+        case WM_DESTROY: {
             KillTimer(hwnd, ANIMATION_TIMER_ID);
             PostQuitMessage(0);
             return 0;
+        }
     }
 
     return DefWindowProc(hwnd, uMsg, wParam, lParam);

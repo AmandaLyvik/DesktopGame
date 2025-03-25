@@ -19,6 +19,8 @@ public:
     void Update(); // Called every tick (e.g. 16ms)
     void Move(int dx, int dy);
     void Draw(Gdiplus::Graphics &g);
+    void OnMouseClick(int mouseX, int mouseY);
+    bool IsMouseOver(int mouseX, int mouseY);
 
     void SetPosition(int x, int y);
     void SetHeight(int h);
@@ -62,6 +64,7 @@ private:
     int width = 100, height = 100;
     int movementX = 0;
     int movementY = 0;
+    bool clicked;
 
     DWORD lastUpdateTime = 0;
     int elapsedSinceLastFrame = 0;
@@ -71,5 +74,6 @@ private:
     void CheckTransition();
     void ApplyTransition(const std::string& targetAnimation);
     bool EvaluateCondition(const std::string& condition, const Transition& transition);
+    
     Gdiplus::Image *GetCurrentFrameImage() const;
 };

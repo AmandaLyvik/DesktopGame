@@ -48,6 +48,9 @@ void Sprite::LoadStateMachine(const std::wstring& stateMachinePath) {
             newTransition.intervalMin = transition["intervalMin"];
             newTransition.intervalMax = transition["intervalMax"];
           }
+          if (transition.contains("intervalSet")) {
+            newTransition.intervalSet = transition["intervalSet"];
+          }
           newState.transitions.push_back(newTransition);
       }
 
@@ -197,9 +200,26 @@ bool Sprite::EvaluateCondition(const std::string& condition, const Transition& t
 
     return elapsed >= transition.intervalSet;
   }
+  if (condition == "onClick") {
+    bool wasClicked = clicked; 
+    clicked = false; 
+
+    return wasClicked;
+  }
   // Add more conditions here if needed
 
   return false; // Default to false if the condition is unknown
+}
+
+void Sprite::OnMouseClick(int mouseX, int mouseY) {
+  // Check if the click is inside the sprite's rectangle
+  if (IsMouseOver(mouseX, mouseY)) {
+      clicked = true;
+  }
+}
+bool Sprite::IsMouseOver(int mouseX, int mouseY) {
+  return mouseX >= x && mouseX <= (x + width) &&
+         mouseY >= y && mouseY <= (y + height);
 }
 
 void Sprite::ApplyTransition(const std::string& targetAnimation) {
