@@ -30,37 +30,37 @@ void Sprite::LoadStateMachine(const std::wstring& stateMachinePath) {
   bool firstState = true;
 
   for (auto& state : j.items()) {
-      const auto& stateName = state.key();
-      const auto& stateData = state.value();
+    const auto& stateName = state.key();
+    const auto& stateData = state.value();
 
-      State newState;
-      newState.animation = stateData["animation"];
-      
-      // Load transitions
-      for (const auto& transition : stateData["transitions"]) {
-          Transition newTransition;
-          newTransition.to = transition["to"];
-          newTransition.condition = transition["condition"];
-          if (transition.contains("probability")) {
-            newTransition.probability = transition["probability"];
-          }
-          if (transition.contains("intervalMin") && transition.contains("intervalMax")) {
-            newTransition.intervalMin = transition["intervalMin"];
-            newTransition.intervalMax = transition["intervalMax"];
-          }
-          if (transition.contains("intervalSet")) {
-            newTransition.intervalSet = transition["intervalSet"];
-          }
-          newState.transitions.push_back(newTransition);
-      }
+    State newState;
+    newState.animation = stateData["animation"];
+    
+    // Load transitions
+    for (const auto& transition : stateData["transitions"]) {
+        Transition newTransition;
+        newTransition.to = transition["to"];
+        newTransition.condition = transition["condition"];
+        if (transition.contains("probability")) {
+          newTransition.probability = transition["probability"];
+        }
+        if (transition.contains("intervalMin") && transition.contains("intervalMax")) {
+          newTransition.intervalMin = transition["intervalMin"];
+          newTransition.intervalMax = transition["intervalMax"];
+        }
+        if (transition.contains("intervalSet")) {
+          newTransition.intervalSet = transition["intervalSet"];
+        }
+        newState.transitions.push_back(newTransition);
+    }
 
-      stateMachine[stateName] = newState;
+    stateMachine[stateName] = newState;
 
-      // Apply the animation of the first state as default
-      if (firstState) {
-        ApplyAnimation(newState.animation);
-        firstState = false;
-      }
+    // Apply the animation of the first state as default
+    if (firstState) {
+      ApplyAnimation(newState.animation);
+      firstState = false;
+    }
   }
 }
 
@@ -164,7 +164,7 @@ void Sprite::CheckTransition() {
             for (const auto& t : transitions) {
                 cumulative += t.probability;
                 if (r <= cumulative) {
-                    ApplyTransition(t.to);
+                    ApplyTransition(stateMachine[t.to].animation);
                     return;
                 }
             }

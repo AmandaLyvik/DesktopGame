@@ -37,5 +37,15 @@
         "intervalMax": 1000
       }
     ]
+  },
+  "spinRightSetTime": {
+    "animation": "spinRight",
+    "transitions": [
+      {
+        "to": "walkLeft",
+        "condition": "setInterval",
+        "intervalSet": 500
+      }
+    ]
   }
 }
